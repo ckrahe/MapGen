@@ -1,0 +1,3 @@
+# MapGen
+
+Foundational map generation
