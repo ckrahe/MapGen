@@ -1,0 +1,7 @@
+# Project targets
+/maplib/target/
+/mapsim/target/
+/maptool/target/
+
+# IntelliJ
+.idea/
