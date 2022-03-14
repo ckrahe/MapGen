@@ -1,0 +1,39 @@
+<sld:StyledLayerDescriptor
+        version="1.0.0"
+        xmlns="http://www.opengis.net/ogc"
+        xmlns:sld="http://www.opengis.net/sld"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.opengis.net/sld https://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd">
+
+<sld:NamedLayer>
+    <sld:Name>MapGenLayer</sld:Name>
+    <sld:UserStyle>
+        <sld:Name>MapGenStyle</sld:Name>
+        <sld:FeatureTypeStyle>
+            <sld:Rule>
+                <sld:MaxScaleDenominator>1.7976931348623157E308</sld:MaxScaleDenominator>
+                <sld:PointSymbolizer>
+                    <sld:Graphic>
+                        <sld:Mark>
+                            <sld:WellKnownName>circle</sld:WellKnownName>
+                            <sld:Fill>
+                                <sld:CssParameter name="fill">#FF0000</sld:CssParameter>
+                                <sld:CssParameter name="fill-opacity">1</sld:CssParameter>
+                            </sld:Fill>
+                            <sld:Stroke>
+                                <sld:CssParameter name="stroke">#FFFFFF</sld:CssParameter>
+                                <sld:CssParameter name="stroke-opacity">1</sld:CssParameter>
+                                <sld:CssParameter name="stroke-width">1</sld:CssParameter>
+                            </sld:Stroke>
+                        </sld:Mark>
+                        <sld:Opacity>1</sld:Opacity>
+                        <sld:Size>3</sld:Size>
+                        <sld:Rotation>0</sld:Rotation>
+                    </sld:Graphic>
+                </sld:PointSymbolizer>
+            </sld:Rule>
+        </sld:FeatureTypeStyle>
+    </sld:UserStyle>
+</sld:NamedLayer>
+
+</sld:StyledLayerDescriptor>
