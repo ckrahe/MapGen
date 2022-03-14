@@ -2,8 +2,6 @@ package org.krahe.chris.mapgen.core.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.krahe.chris.mapgen.core.util.OptionsException;
-import org.krahe.chris.mapgen.core.util.OptionsParser;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
