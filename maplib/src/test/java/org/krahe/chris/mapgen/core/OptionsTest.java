@@ -3,6 +3,9 @@ package org.krahe.chris.mapgen.core;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.io.ParseException;
 
 class OptionsTest {
 
@@ -47,5 +50,25 @@ class OptionsTest {
         Options.OptionsException e = Assertions.assertThrows(Options.OptionsException.class, () ->
                 Options.testAndNormalizeBbox("10,12,8,12"));
         Assertions.assertTrue(e.getMessage().contains("max"));
+    }
+
+    @Test
+    void simplePointTypeTest() throws Options.OptionsException {
+        Geometry geometry = Options.validateWkt("POINT (9 11)");
+        Assertions.assertTrue(geometry instanceof Point);
+    }
+
+    @Test
+    void simplePointValueTest() throws Options.OptionsException {
+        Geometry geometry = Options.validateWkt("POINT (9 11)");
+        Point point = (Point) geometry;
+        Assertions.assertEquals(11.0, point.getY());
+    }
+
+    @Test
+    void malformedWktTest() {
+        Options.OptionsException e = Assertions.assertThrows(Options.OptionsException.class, () ->
+                Options.validateWkt("POINT [9 11]"));
+        Assertions.assertTrue(e.getCause() instanceof ParseException);
     }
 }

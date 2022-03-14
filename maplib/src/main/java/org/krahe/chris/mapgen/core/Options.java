@@ -1,10 +1,13 @@
 package org.krahe.chris.mapgen.core;
 
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 public class Options {
 	private boolean valid;
-	private String data;
+	private Geometry geometry;
 	private String symbol;
 	private Integer width;
 	private Integer height;
@@ -12,13 +15,32 @@ public class Options {
 	private Boolean ui;
 	private String filename;
 	private String generator;
-	
-	private String bboxStr; // for ease in toString
+
+	// for ease in toString
+	private String wkt;
+	private String bboxStr;
 	
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	
 	public static class OptionsException extends Exception {
-		public OptionsException(String message) { super(message); }
+		private final Exception cause;
+		public OptionsException(String message) {
+			super(message);
+			cause = null;
+		}
+
+		public OptionsException(String message, Exception cause) {
+			super(message);
+			this.cause = cause;
+		}
+
+		public boolean hasCause() {
+			return cause != null;
+		}
+
+		public Exception getCause() {
+			return cause;
+		}
 	}
 	
 	public Options() { valid = false; }
@@ -28,7 +50,7 @@ public class Options {
 	 * @throws OptionsException if required properties are missing or malformed
 	 */
 	public void init() throws OptionsException {
-		loadData();
+		loadWkt();
 		loadSymbol();
 		loadSize();
 		loadBbox();
@@ -39,10 +61,10 @@ public class Options {
 		valid = true;
 	}
 	
-	public String getData() {
-		return data;
+	public String getWkt() {
+		return wkt;
 	}
-	
+	public Geometry getGeometry() { return geometry; }
 	public String getSymbol() { return symbol; }
 	public Boolean hasSymbol() { return(symbol != null); }
 	public Integer getWidth() { return width; }
@@ -52,10 +74,22 @@ public class Options {
 	public String getFilename() { return filename; }
 	public String getGenerator() { return generator; }
 
-	private void loadData() {
-		data = System.getProperty("data");
+	private void loadWkt() throws OptionsException {
+		wkt = System.getProperty("wkt");
+		geometry = validateWkt(wkt);
 	}
-	
+
+	protected static Geometry validateWkt(String wkt) throws OptionsException {
+		Geometry geometry;
+		try {
+			WKTReader reader = new WKTReader();
+			geometry = reader.read(wkt);
+		} catch (ParseException e) {
+			throw new OptionsException("error parsing wkt", e);
+		}
+		return geometry;
+	}
+
 	private void loadSymbol() {
 		symbol = System.getProperty("symbol");
 	}
@@ -135,18 +169,11 @@ public class Options {
     private void validateFinal() {
     }
 
-    private void validateData() throws OptionsException {
-        if (data == null)
-            throw new OptionsException("data property is required");
-        if (data.length() == 0)
-            throw new OptionsException("data property needs a non-empty value");
-    }
-    
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		
 		if (valid) {
-			sb.append(String.format("data = %s", data));
+			sb.append(String.format("wkt = %s", getWkt()));
 			sb.append(LINE_SEPARATOR);
 			sb.append(hasSymbol() ? String.format("symbol = %s", symbol) : "no symbol");
 			sb.append(LINE_SEPARATOR);
