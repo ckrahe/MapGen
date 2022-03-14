@@ -3,7 +3,7 @@ package org.krahe.chris.mapgen.core;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.xml.styling.SLDParser;
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 
 import java.awt.image.BufferedImage;
 
@@ -14,10 +14,9 @@ public class StyledGenerator implements Generator {
 
     public StyledGenerator() {
         sftBuilder = new SimpleFeatureTypeBuilder();
-        sftBuilder.setName("MapGenStyle");
+        sftBuilder.setName("MapGenSchema");
         sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        sftBuilder.add("label", String.class);
-        sftBuilder.add("geo", Geometry.class);
+        sftBuilder.add("point", Point.class);
 
     }
 

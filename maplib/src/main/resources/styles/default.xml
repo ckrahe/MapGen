@@ -1,6 +1,7 @@
 <sld:StyledLayerDescriptor
         version="1.0.0"
         xmlns="http://www.opengis.net/ogc"
+        xmlns:ogc="http://www.opengis.net/ogc"
         xmlns:sld="http://www.opengis.net/sld"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.opengis.net/sld https://schemas.opengis.net/sld/1.0.0/StyledLayerDescriptor.xsd">
@@ -11,8 +12,12 @@
         <sld:Name>MapGenStyle</sld:Name>
         <sld:FeatureTypeStyle>
             <sld:Rule>
+                <sld:FeatureTypeName>MapGenSchema</sld:FeatureTypeName>
                 <sld:MaxScaleDenominator>1.7976931348623157E308</sld:MaxScaleDenominator>
                 <sld:PointSymbolizer>
+                    <sld:Point>
+                        <ogc:PropertyName>point</ogc:PropertyName>
+                    </sld:Point>
                     <sld:Graphic>
                         <sld:Mark>
                             <sld:WellKnownName>circle</sld:WellKnownName>
