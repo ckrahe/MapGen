@@ -2,6 +2,7 @@ package org.krahe.chris.mapgen.factory;
 
 import org.krahe.chris.mapgen.core.Generator;
 import org.krahe.chris.mapgen.core.Options;
+import org.krahe.chris.mapgen.core.StyledGenerator;
 import org.krahe.chris.mapgen.example.ColorGenerator;
 import org.krahe.chris.mapgen.example.StaticGenerator;
 
@@ -11,6 +12,10 @@ public class GeneratorFactory {
 	public static Generator build(Options options) {
 		Generator generator;
 		switch (options.getGenerator()) {
+			case "styled":
+				generator = new StyledGenerator();
+				break;
+
 			case "color":
 				generator = new ColorGenerator();
 				break;

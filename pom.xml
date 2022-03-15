@@ -6,7 +6,7 @@
 
     <groupId>org.krahe.chris</groupId>
     <artifactId>MapGen</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -42,6 +42,12 @@
 
             <dependency>
                 <groupId>org.geotools</groupId>
+                <artifactId>gt-render</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.geotools</groupId>
                 <artifactId>gt-xml</artifactId>
                 <version>${geotools.version}</version>
             </dependency>
@@ -58,6 +64,7 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -71,6 +78,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- TODO: Resolve "Invalid signature file digest" at mvn package time
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin -->
+
         </plugins>
     </build>
 

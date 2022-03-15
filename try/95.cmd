@@ -4,6 +4,8 @@ SET maptoolCP=maptool\target\maptool-1.1.0.jar;maptool\target\dependency\*
 SET CP=%maplibCP%%mapsimCP%%maptoolCP%
 
 java -cp "%CP%" ^
-    -Dgenerator=static ^
+    -Dwkt="POINT (9.5 9.5)" ^
+    -Dbbox=9,9,11,11 ^
+    -Dgenerator=styled ^
     -Dui=true ^
     org.krahe.chris.mapgen.MapTool

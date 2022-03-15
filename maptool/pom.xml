@@ -7,11 +7,11 @@
     <parent>
         <groupId>org.krahe.chris</groupId>
         <artifactId>MapGen</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </parent>
     
     <artifactId>maptool</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
 	<dependencies>
@@ -19,13 +19,13 @@
 		<dependency>
 			<groupId>org.krahe.chris</groupId>
 			<artifactId>maplib</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.krahe.chris</groupId>
 			<artifactId>mapsim</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0</version>
 		</dependency>
 
 	</dependencies>

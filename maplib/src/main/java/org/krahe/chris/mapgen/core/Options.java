@@ -5,6 +5,8 @@ import org.krahe.chris.mapgen.core.util.OptionsParser;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 
+import java.awt.*;
+
 public class Options {
 	private boolean valid;
 	private Geometry geometry;
@@ -36,6 +38,7 @@ public class Options {
 		loadUI();
 		loadFilename();
 		loadGenerator();
+		validateFinal();
 		valid = true;
 	}
 	
@@ -52,9 +55,14 @@ public class Options {
 	public String getFilename() { return filename; }
 	public String getGenerator() { return generator; }
 
+	public Rectangle getCanvas() {
+		return new Rectangle(getWidth(), getHeight());
+	}
+
 	private void loadWkt() throws OptionsException {
 		wkt = System.getProperty("wkt");
-		geometry = OptionsParser.validateWkt(wkt);
+		if (wkt != null)
+			geometry = OptionsParser.validateWkt(wkt);
 	}
 
 	private void loadSymbol() {
@@ -68,7 +76,8 @@ public class Options {
 	
 	private void loadBbox() throws OptionsException {
 		bboxStr = System.getProperty("bbox");
-		bbox = OptionsParser.testAndNormalizeBbox(bboxStr);
+		if (bboxStr != null)
+			bbox = OptionsParser.testAndNormalizeBbox(bboxStr);
 	}
 
 	private void loadUI() {
@@ -81,7 +90,16 @@ public class Options {
 	}
 	
 	private void loadGenerator() {
-		generator = System.getProperty("generator", "color");
+		generator = System.getProperty("generator", "static");
+	}
+
+	private void validateFinal() throws OptionsException {
+		if (generator.equals("styled")) {
+			if (wkt == null)
+				throw new OptionsException("wkt is required for the styled generator");
+			if (bbox == null)
+				throw new OptionsException("bbox is required for the styled generator");
+		}
 	}
     
 	public String toString() {
