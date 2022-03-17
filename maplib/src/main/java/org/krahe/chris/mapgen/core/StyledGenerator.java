@@ -11,6 +11,8 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
 import org.geotools.styling.*;
+import org.geotools.styling.Stroke;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -24,26 +26,28 @@ import java.util.List;
 
 public class StyledGenerator implements Generator {
 
-    private final SimpleFeatureType schema;
+    private SimpleFeatureType schema;
     private final StyleFactory styleFactory;
     private final FilterFactory filterFactory;
 
     public StyledGenerator() {
-        schema = createSchema();
         styleFactory = CommonFactoryFinder.getStyleFactory();
         filterFactory = CommonFactoryFinder.getFilterFactory();
     }
 
-    private SimpleFeatureType createSchema() {
+    private SimpleFeatureType createSchema(Options options) {
         SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
         sftBuilder.setName("MapGenSchema");
         sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        sftBuilder.add("point", Point.class);
+        String name = options.getWkt().contains("POINT") ? "point" : "geo";
+        Class<?> cls = options.getWkt().contains("POINT") ? Point.class : Geometry.class;
+        sftBuilder.add(name, cls);
         return sftBuilder.buildFeatureType();
     }
 
     @Override
     public BufferedImage generate(Options options) {
+        schema = createSchema(options);
         BufferedImage image = new BufferedImage(options.getWidth(), options.getHeight(),
                 BufferedImage.TYPE_INT_RGB);
 
@@ -56,7 +60,8 @@ public class StyledGenerator implements Generator {
 
     private MapContent createMapContent(Options options) {
         MapContent mapContent = new MapContent();
-        mapContent.addLayer(new FeatureLayer(createFeatures(options), createStyle()));
+        Style style = options.getWkt().contains("POINT") ? createPointStyle() : createPolygonStyle();
+        mapContent.addLayer(new FeatureLayer(createFeatures(options), style));
         return mapContent;
     }
 
@@ -64,13 +69,14 @@ public class StyledGenerator implements Generator {
         SimpleFeatureBuilder sfBuilder = new SimpleFeatureBuilder(schema);
 
         List<SimpleFeature> features = new ArrayList<>();
-        sfBuilder.set("point", options.getGeometry());
+        String name = options.getWkt().contains("POINT") ? "point" : "geo";
+        sfBuilder.set(name, options.getGeometry());
         features.add(sfBuilder.buildFeature(null));
 
         return new ListFeatureCollection(schema, features);
     }
 
-    private Style createStyle() {
+    private Style createPointStyle() {
         Graphic graphic = styleFactory.createDefaultGraphic();
 
         // create marker
@@ -86,6 +92,33 @@ public class StyledGenerator implements Generator {
         // Setting the geometryPropertyName arg to null signals that we want to
         // draw the default geometry of features
         PointSymbolizer sym = styleFactory.createPointSymbolizer(graphic, null);
+
+        Rule rule = styleFactory.createRule();
+        rule.symbolizers().add(sym);
+        FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(rule);
+        Style style = styleFactory.createStyle();
+        style.featureTypeStyles().add(fts);
+
+        return style;
+    }
+
+    private Style createPolygonStyle() {
+        Stroke stroke =
+                styleFactory.createStroke(
+                        filterFactory.literal(Color.GREEN),
+                        filterFactory.literal(1),
+                        filterFactory.literal(1));
+
+        // create a transparent 'fill'
+        Fill fill =
+                styleFactory.createFill(
+                        filterFactory.literal(Color.WHITE), filterFactory.literal(0.0));
+
+        /*
+         * Setting the geometryPropertyName arg to null signals that we want to
+         * draw the default geometry of features
+         */
+        PolygonSymbolizer sym = styleFactory.createPolygonSymbolizer(stroke, fill, null);
 
         Rule rule = styleFactory.createRule();
         rule.symbolizers().add(sym);
