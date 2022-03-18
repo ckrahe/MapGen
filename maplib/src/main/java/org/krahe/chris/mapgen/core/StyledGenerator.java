@@ -10,8 +10,8 @@ import org.geotools.map.MapContent;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
-import org.geotools.styling.*;
 import org.geotools.styling.Stroke;
+import org.geotools.styling.*;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
@@ -26,28 +26,40 @@ import java.util.List;
 
 public class StyledGenerator implements Generator {
 
-    private SimpleFeatureType schema;
+    private final SimpleFeatureType pointSchema;
+    private final SimpleFeatureType polygonSchema;
     private final StyleFactory styleFactory;
     private final FilterFactory filterFactory;
 
     public StyledGenerator() {
+        pointSchema = createPointSchema();
+        polygonSchema = createPolygonSchema();
         styleFactory = CommonFactoryFinder.getStyleFactory();
         filterFactory = CommonFactoryFinder.getFilterFactory();
     }
 
-    private SimpleFeatureType createSchema(Options options) {
+    private SimpleFeatureType createPointSchema() {
         SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
+
         sftBuilder.setName("MapGenSchema");
         sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        String name = options.getWkt().contains("POINT") ? "point" : "geo";
-        Class<?> cls = options.getWkt().contains("POINT") ? Point.class : Geometry.class;
-        sftBuilder.add(name, cls);
+        sftBuilder.add("point", Point.class);
+
+        return sftBuilder.buildFeatureType();
+    }
+
+    private SimpleFeatureType createPolygonSchema() {
+        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
+
+        sftBuilder.setName("MapGenSchema");
+        sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
+        sftBuilder.add("geo", Geometry.class);
+
         return sftBuilder.buildFeatureType();
     }
 
     @Override
     public BufferedImage generate(Options options) {
-        schema = createSchema(options);
         BufferedImage image = new BufferedImage(options.getWidth(), options.getHeight(),
                 BufferedImage.TYPE_INT_RGB);
 
@@ -60,20 +72,26 @@ public class StyledGenerator implements Generator {
 
     private MapContent createMapContent(Options options) {
         MapContent mapContent = new MapContent();
-        Style style = options.getWkt().contains("POINT") ? createPointStyle() : createPolygonStyle();
-        mapContent.addLayer(new FeatureLayer(createFeatures(options), style));
+        mapContent.addLayer(new FeatureLayer(createFeatures(options, "point"), createPointStyle()));
+        mapContent.addLayer(new FeatureLayer(createFeatures(options, "geo"), createPolygonStyle()));
         return mapContent;
     }
 
-    private FeatureCollection<SimpleFeatureType, SimpleFeature> createFeatures(Options options) {
-        SimpleFeatureBuilder sfBuilder = new SimpleFeatureBuilder(schema);
+    private FeatureCollection<SimpleFeatureType, SimpleFeature> createFeatures(Options options, String type) {
+        SimpleFeatureType activeSchema = type.equals("point") ? pointSchema : polygonSchema;
+        SimpleFeatureBuilder sfBuilder = new SimpleFeatureBuilder(activeSchema);
 
         List<SimpleFeature> features = new ArrayList<>();
-        String name = options.getWkt().contains("POINT") ? "point" : "geo";
-        sfBuilder.set(name, options.getGeometry());
-        features.add(sfBuilder.buildFeature(null));
-
-        return new ListFeatureCollection(schema, features);
+        for (Geometry geometry : options.getGeometryList()) {
+            if (    (type.equals("point") && geometry instanceof Point)
+                ||  (type.equals("geo") && (!(geometry instanceof Point))))
+            {
+                sfBuilder.set(type, geometry);
+                features.add(sfBuilder.buildFeature(null));
+            }
+        }
+        System.out.printf("Adding %s %s%n", features.size(), type);
+        return new ListFeatureCollection(activeSchema, features);
     }
 
     private Style createPointStyle() {
@@ -112,7 +130,7 @@ public class StyledGenerator implements Generator {
         // create a transparent 'fill'
         Fill fill =
                 styleFactory.createFill(
-                        filterFactory.literal(Color.WHITE), filterFactory.literal(0.0));
+                        filterFactory.literal(Color.LIGHT_GRAY), filterFactory.literal(0.0));
 
         /*
          * Setting the geometryPropertyName arg to null signals that we want to

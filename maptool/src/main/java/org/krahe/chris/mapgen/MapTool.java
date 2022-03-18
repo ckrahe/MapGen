@@ -17,6 +17,7 @@ public class MapTool {
 		Options options = new Options();
 		try {
 			options.init();
+			System.out.printf("Got WKT %s%n", options.getWkt());
 			handleSuccess(options);
 		} catch(Exception e) {
 			handleFailure(e);

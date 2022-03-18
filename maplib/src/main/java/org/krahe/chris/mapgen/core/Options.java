@@ -4,8 +4,11 @@ import org.krahe.chris.mapgen.core.util.OptionsException;
 import org.krahe.chris.mapgen.core.util.OptionsParser;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Options {
 	private boolean valid;
@@ -46,6 +49,19 @@ public class Options {
 		return wkt;
 	}
 	public Geometry getGeometry() { return geometry; }
+	public List<Geometry> getGeometryList() {
+		List<Geometry> list = new ArrayList<>();
+		if (geometry instanceof GeometryCollection) {
+			GeometryCollection collection = (GeometryCollection) geometry;
+			int count = collection.getNumGeometries();
+			for (int i=0; i < count; i++) {
+				list.add(collection.getGeometryN(i));
+			}
+		} else {
+			list.add(geometry);
+		}
+		return list;
+	}
 	public String getSymbol() { return symbol; }
 	public Boolean hasSymbol() { return(symbol != null); }
 	public Integer getWidth() { return width; }
