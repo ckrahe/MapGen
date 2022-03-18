@@ -1,22 +1,19 @@
 package org.krahe.chris.mapgen.core;
 
 import org.geotools.data.collection.ListFeatureCollection;
-import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.map.FeatureLayer;
 import org.geotools.map.MapContent;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
-import org.geotools.styling.Stroke;
-import org.geotools.styling.*;
+import org.krahe.chris.mapgen.core.util.GeoType;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -26,36 +23,10 @@ import java.util.List;
 
 public class StyledGenerator implements Generator {
 
-    private final SimpleFeatureType pointSchema;
-    private final SimpleFeatureType polygonSchema;
-    private final StyleFactory styleFactory;
-    private final FilterFactory filterFactory;
+    private final MapTools mapTools;
 
     public StyledGenerator() {
-        pointSchema = createPointSchema();
-        polygonSchema = createPolygonSchema();
-        styleFactory = CommonFactoryFinder.getStyleFactory();
-        filterFactory = CommonFactoryFinder.getFilterFactory();
-    }
-
-    private SimpleFeatureType createPointSchema() {
-        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
-
-        sftBuilder.setName("MapGenSchema");
-        sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        sftBuilder.add("point", Point.class);
-
-        return sftBuilder.buildFeatureType();
-    }
-
-    private SimpleFeatureType createPolygonSchema() {
-        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
-
-        sftBuilder.setName("MapGenSchema");
-        sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        sftBuilder.add("geo", Geometry.class);
-
-        return sftBuilder.buildFeatureType();
+        mapTools = MapTools.getInstance();
     }
 
     @Override
@@ -72,79 +43,34 @@ public class StyledGenerator implements Generator {
 
     private MapContent createMapContent(Options options) {
         MapContent mapContent = new MapContent();
-        mapContent.addLayer(new FeatureLayer(createFeatures(options, "point"), createPointStyle()));
-        mapContent.addLayer(new FeatureLayer(createFeatures(options, "geo"), createPolygonStyle()));
+
+        mapContent.addLayer(createFeatureLayer(options, GeoType.POINT));
+        mapContent.addLayer(createFeatureLayer(options, GeoType.LINE));
+        mapContent.addLayer(createFeatureLayer(options, GeoType.POLYGON));
+
         return mapContent;
     }
 
-    private FeatureCollection<SimpleFeatureType, SimpleFeature> createFeatures(Options options, String type) {
-        SimpleFeatureType activeSchema = type.equals("point") ? pointSchema : polygonSchema;
+    private FeatureLayer createFeatureLayer(Options options, GeoType geoType) {
+        return new FeatureLayer(createFeatures(options, geoType), mapTools.getStyleMap().get(geoType));
+    }
+
+    private FeatureCollection<SimpleFeatureType, SimpleFeature> createFeatures(Options options, GeoType geoType) {
+        SimpleFeatureType activeSchema = mapTools.getSchemaMap().get(geoType);
         SimpleFeatureBuilder sfBuilder = new SimpleFeatureBuilder(activeSchema);
 
         List<SimpleFeature> features = new ArrayList<>();
         for (Geometry geometry : options.getGeometryList()) {
-            if (    (type.equals("point") && geometry instanceof Point)
-                ||  (type.equals("geo") && (!(geometry instanceof Point))))
+            if (    (geoType == GeoType.POINT && geometry instanceof Point)
+                ||  (geoType == GeoType.LINE && geometry instanceof LineString)
+                ||  (geoType == GeoType.POLYGON && (geometry instanceof Polygon)))
             {
-                sfBuilder.set(type, geometry);
+                sfBuilder.set(geoType.getName(), geometry);
                 features.add(sfBuilder.buildFeature(null));
             }
         }
-        System.out.printf("Adding %s %s%n", features.size(), type);
+        System.out.printf("Adding %s %s%n", features.size(), geoType.getName());
         return new ListFeatureCollection(activeSchema, features);
-    }
-
-    private Style createPointStyle() {
-        Graphic graphic = styleFactory.createDefaultGraphic();
-
-        // create marker
-        Mark mark = styleFactory.getCircleMark();
-        mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.WHITE), filterFactory.literal(1)));
-        mark.setFill(styleFactory.createFill(filterFactory.literal(Color.RED)));
-
-        // add marker
-        graphic.graphicalSymbols().clear();
-        graphic.graphicalSymbols().add(mark);
-        graphic.setSize(filterFactory.literal(8));
-
-        // Setting the geometryPropertyName arg to null signals that we want to
-        // draw the default geometry of features
-        PointSymbolizer sym = styleFactory.createPointSymbolizer(graphic, null);
-
-        Rule rule = styleFactory.createRule();
-        rule.symbolizers().add(sym);
-        FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(rule);
-        Style style = styleFactory.createStyle();
-        style.featureTypeStyles().add(fts);
-
-        return style;
-    }
-
-    private Style createPolygonStyle() {
-        Stroke stroke =
-                styleFactory.createStroke(
-                        filterFactory.literal(Color.GREEN),
-                        filterFactory.literal(1),
-                        filterFactory.literal(1));
-
-        // create a transparent 'fill'
-        Fill fill =
-                styleFactory.createFill(
-                        filterFactory.literal(Color.LIGHT_GRAY), filterFactory.literal(0.0));
-
-        /*
-         * Setting the geometryPropertyName arg to null signals that we want to
-         * draw the default geometry of features
-         */
-        PolygonSymbolizer sym = styleFactory.createPolygonSymbolizer(stroke, fill, null);
-
-        Rule rule = styleFactory.createRule();
-        rule.symbolizers().add(sym);
-        FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(rule);
-        Style style = styleFactory.createStyle();
-        style.featureTypeStyles().add(fts);
-
-        return style;
     }
 
     private GTRenderer createRenderer(MapContent mapContent) {
