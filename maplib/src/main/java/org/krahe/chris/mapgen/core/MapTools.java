@@ -3,13 +3,9 @@ package org.krahe.chris.mapgen.core;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.geotools.styling.*;
 import org.geotools.styling.Stroke;
+import org.geotools.styling.*;
 import org.krahe.chris.mapgen.core.util.GeoType;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory;
 
@@ -129,14 +125,6 @@ public class MapTools {
 
     public Map<GeoType, Style> getStyleMap() {
         return styleMap;
-    }
-
-    public StyleFactory getStyleFactory() {
-        return styleFactory;
-    }
-
-    public FilterFactory getFilterFactory() {
-        return filterFactory;
     }
 
     public static MapTools getInstance() {
