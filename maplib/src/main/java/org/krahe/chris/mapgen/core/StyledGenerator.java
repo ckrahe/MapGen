@@ -61,12 +61,15 @@ public class StyledGenerator implements Generator {
 
         List<SimpleFeature> features = new ArrayList<>();
         for (Geometry geometry : options.getGeometryList()) {
-            if (    (geoType == GeoType.POINT && geometry instanceof Point)
-                ||  (geoType == GeoType.LINE && geometry instanceof LineString)
-                ||  (geoType == GeoType.POLYGON && (geometry instanceof Polygon)))
-            {
-                sfBuilder.set(geoType.getName(), geometry);
-                features.add(sfBuilder.buildFeature(null));
+            String geoTypeClassName = geoType.getGeoClass().getTypeName();
+            try {
+                if (Class.forName(geoTypeClassName).isInstance(geometry))
+                {
+                    sfBuilder.set(geoType.getName(), geometry);
+                    features.add(sfBuilder.buildFeature(null));
+                }
+            } catch (ClassNotFoundException e) {
+                System.out.printf("Skipping unexpected GeoType class %s%n", geoTypeClassName);
             }
         }
         System.out.printf("Adding %s %s%n", features.size(), geoType.getName());

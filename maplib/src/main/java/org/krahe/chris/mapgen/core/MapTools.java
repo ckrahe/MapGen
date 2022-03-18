@@ -35,39 +35,19 @@ public class MapTools {
     private Map<GeoType, SimpleFeatureType> createSchemaMap() {
         final Map<GeoType, SimpleFeatureType> schemaMap = new HashMap<>();
 
-        schemaMap.put(GeoType.POINT, createPointSchema());
-        schemaMap.put(GeoType.LINE, createLineSchema());
-        schemaMap.put(GeoType.POLYGON, createPolygonSchema());
+        schemaMap.put(GeoType.POINT, createSchema(GeoType.POINT));
+        schemaMap.put(GeoType.LINE, createSchema(GeoType.LINE));
+        schemaMap.put(GeoType.POLYGON, createSchema(GeoType.POLYGON));
 
         return schemaMap;
     }
 
-    private SimpleFeatureType createPointSchema() {
+    private SimpleFeatureType createSchema(GeoType geoType) {
         SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
 
-        sftBuilder.setName("MapGenSchema");
+        sftBuilder.setName(String.format("MapGenSchema_%s", geoType.getName()));
         sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        sftBuilder.add(GeoType.POINT.getName(), Point.class);
-
-        return sftBuilder.buildFeatureType();
-    }
-
-    private SimpleFeatureType createLineSchema() {
-        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
-
-        sftBuilder.setName("MapGenSchema");
-        sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        sftBuilder.add(GeoType.LINE.getName(), LineString.class);
-
-        return sftBuilder.buildFeatureType();
-    }
-
-    private SimpleFeatureType createPolygonSchema() {
-        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
-
-        sftBuilder.setName("MapGenSchema");
-        sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
-        sftBuilder.add(GeoType.POLYGON.getName(), Polygon.class);
+        sftBuilder.add(geoType.getName(), geoType.getGeoClass());
 
         return sftBuilder.buildFeatureType();
     }
