@@ -62,14 +62,15 @@ public class MapTools {
         Graphic graphic = styleFactory.createDefaultGraphic();
 
         // create marker
-        Mark mark = styleFactory.getCircleMark();
-        mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.WHITE), filterFactory.literal(1)));
+        Mark mark = styleFactory.getCrossMark();
+        mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.RED), filterFactory.literal(0.1)));
         mark.setFill(styleFactory.createFill(filterFactory.literal(Color.RED)));
 
         // add marker
         graphic.graphicalSymbols().clear();
         graphic.graphicalSymbols().add(mark);
-        graphic.setSize(filterFactory.literal(8));
+        graphic.setSize(filterFactory.literal(10));
+        graphic.setRotation(filterFactory.literal(45));
 
         // Setting the geometryPropertyName arg to null signals that we want to
         // draw the default geometry of features
@@ -85,11 +86,11 @@ public class MapTools {
     }
 
     private Style createLineStyle() {
-        return createPolyStyle(Color.CYAN, 5, Color.PINK, 0.0);
+        return createPolyStyle(Color.CYAN, 2, Color.PINK, 0.0);
     }
 
     private Style createPolygonStyle() {
-        return createPolyStyle(Color.GREEN, 1, Color.GREEN, 0.0);
+        return createPolyStyle(Color.GREEN, 1, Color.GREEN, 0.2);
     }
 
     private Style createPolyStyle(Color strokeColor, int strokeWidth, Color fillColor, double fillOpacity) {
