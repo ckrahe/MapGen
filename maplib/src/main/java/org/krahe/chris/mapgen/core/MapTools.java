@@ -2,14 +2,21 @@ package org.krahe.chris.mapgen.core;
 
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.metadata.iso.citation.OnLineResourceImpl;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.*;
 import org.krahe.chris.mapgen.core.util.GeoType;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory;
+import org.opengis.filter.expression.Literal;
+import org.opengis.style.GraphicalSymbol;
 
 import java.awt.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,17 +69,13 @@ public class MapTools {
         Graphic graphic = styleFactory.createDefaultGraphic();
 
         // create marker
-        Mark mark = styleFactory.getCircleMark();
-        mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.WHITE), filterFactory.literal(1)));
-        mark.setFill(styleFactory.createFill(filterFactory.literal(Color.RED)));
+        Mark mark = createCircleMark();
 
         // add marker
         graphic.graphicalSymbols().clear();
         graphic.graphicalSymbols().add(mark);
-        graphic.setSize(filterFactory.literal(8));
+        graphic.setSize(getCircleSize());
 
-        // Setting the geometryPropertyName arg to null signals that we want to
-        // draw the default geometry of features
         PointSymbolizer sym = styleFactory.createPointSymbolizer(graphic, null);
 
         Rule rule = styleFactory.createRule();
@@ -82,6 +85,40 @@ public class MapTools {
         style.featureTypeStyles().add(fts);
 
         return style;
+    }
+
+    private Style createSVGPointStyle() throws URISyntaxException {
+        // follows https://docs.geotools.org/maintenance/userguide/library/render/style.html
+        org.opengis.style.StyleFactory ogStyleFactory = CommonFactoryFinder.getStyleFactory();
+        OnLineResourceImpl svg = new OnLineResourceImpl(new URI("file:marker.svg"));
+        List<GraphicalSymbol> symbols = new ArrayList<>();
+        symbols.add(ogStyleFactory.externalGraphic(svg, "svg", null));
+        symbols.add(createCircleMark());
+
+        org.opengis.style.Graphic graphic = ogStyleFactory.graphic(symbols, null, getCircleSize(),
+                null, null, null);
+
+        org.opengis.style.PointSymbolizer sym = ogStyleFactory.pointSymbolizer("point",
+                filterFactory.property("the_geom"), null, null, graphic);
+
+        Rule rule = styleFactory.createRule();
+        rule.symbolizers().add(sym); // hmmm, this ain't right
+        FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(rule);
+        Style style = styleFactory.createStyle();
+        style.featureTypeStyles().add(fts);
+
+        return style;
+    }
+
+    private Mark createCircleMark() {
+        Mark mark = styleFactory.getCircleMark();
+        mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.WHITE), filterFactory.literal(1)));
+        mark.setFill(styleFactory.createFill(filterFactory.literal(Color.RED)));
+        return mark;
+    }
+
+    private Literal getCircleSize() {
+        filterFactory.literal(8);
     }
 
     private Style createLineStyle() {
