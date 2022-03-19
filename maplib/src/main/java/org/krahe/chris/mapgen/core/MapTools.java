@@ -89,7 +89,7 @@ public class MapTools {
     }
 
     private Style createPolygonStyle() {
-        return createPolyStyle(Color.GREEN, Color.WHITE, 0.0);
+        return createPolyStyle(Color.GREEN, Color.GREEN, 0.0);
     }
 
     private Style createPolyStyle(Color strokeColor, Color fillColor, double fillOpacity) {

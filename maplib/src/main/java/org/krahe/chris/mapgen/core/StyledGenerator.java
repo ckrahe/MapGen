@@ -41,9 +41,9 @@ public class StyledGenerator implements Generator {
     private MapContent createMapContent(Options options) {
         MapContent mapContent = new MapContent();
 
-        mapContent.addLayer(createFeatureLayer(options, GeoType.POINT));
-        mapContent.addLayer(createFeatureLayer(options, GeoType.LINE));
         mapContent.addLayer(createFeatureLayer(options, GeoType.POLYGON));
+        mapContent.addLayer(createFeatureLayer(options, GeoType.LINE));
+        mapContent.addLayer(createFeatureLayer(options, GeoType.POINT));
 
         return mapContent;
     }
