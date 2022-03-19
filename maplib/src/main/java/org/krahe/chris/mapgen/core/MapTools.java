@@ -85,18 +85,18 @@ public class MapTools {
     }
 
     private Style createLineStyle() {
-        return createPolyStyle(Color.BLUE, Color.PINK, 0.0);
+        return createPolyStyle(Color.CYAN, 5, Color.PINK, 0.0);
     }
 
     private Style createPolygonStyle() {
-        return createPolyStyle(Color.GREEN, Color.GREEN, 0.0);
+        return createPolyStyle(Color.GREEN, 1, Color.GREEN, 0.0);
     }
 
-    private Style createPolyStyle(Color strokeColor, Color fillColor, double fillOpacity) {
+    private Style createPolyStyle(Color strokeColor, int strokeWidth, Color fillColor, double fillOpacity) {
         Stroke stroke =
                 styleFactory.createStroke(
                         filterFactory.literal(strokeColor),
-                        filterFactory.literal(1),
+                        filterFactory.literal(strokeWidth),
                         filterFactory.literal(1));
 
         // create a transparent 'fill'
