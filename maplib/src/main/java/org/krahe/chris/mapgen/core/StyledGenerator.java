@@ -28,13 +28,18 @@ public class StyledGenerator implements Generator {
 
     @Override
     public BufferedImage generate(Options options) {
-        BufferedImage image = new BufferedImage(options.getWidth(), options.getHeight(),
-                BufferedImage.TYPE_INT_RGB);
-
+        BufferedImage image = createTransparentImage(options);
         MapContent mapContent = createMapContent(options);
         GTRenderer renderer = createRenderer(mapContent);
         renderer.paint(image.createGraphics(), options.getCanvas(), options.getBbox());
+        return image;
+    }
 
+    private BufferedImage createTransparentImage(Options options) {
+        BufferedImage image = new BufferedImage(options.getWidth(), options.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        g2d.setComposite(AlphaComposite.Clear);
+        g2d.fillRect(0, 0, options.getWidth(), options.getHeight());
         return image;
     }
 

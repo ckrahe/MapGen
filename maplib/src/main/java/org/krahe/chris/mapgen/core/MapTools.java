@@ -63,8 +63,8 @@ public class MapTools {
 
         // create marker
         Mark mark = styleFactory.getCrossMark();
-        mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.RED), filterFactory.literal(0.1)));
-        mark.setFill(styleFactory.createFill(filterFactory.literal(Color.RED)));
+        mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.DARK_GRAY), filterFactory.literal(0.1)));
+        mark.setFill(styleFactory.createFill(filterFactory.literal(Color.DARK_GRAY)));
 
         // add marker
         graphic.graphicalSymbols().clear();
@@ -86,11 +86,11 @@ public class MapTools {
     }
 
     private Style createLineStyle() {
-        return createPolyStyle(Color.CYAN, 2, Color.PINK, 0.0);
+        return createPolyStyle(Color.DARK_GRAY, 2, Color.GRAY, 0.0);
     }
 
     private Style createPolygonStyle() {
-        return createPolyStyle(Color.GREEN, 1, Color.GREEN, 0.2);
+        return createPolyStyle(Color.DARK_GRAY, 1, Color.GRAY, 0.2);
     }
 
     private Style createPolyStyle(Color strokeColor, int strokeWidth, Color fillColor, double fillOpacity) {
