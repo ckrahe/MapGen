@@ -81,7 +81,7 @@ public class StyledGenerator implements Generator {
 
         // given drawing hints
         renderer.setJava2DHints(
-                new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF));
+                new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
         renderer.setRendererHints(
                 Collections.singletonMap("optimizedDataLoadingEnabled", Boolean.TRUE));
 
