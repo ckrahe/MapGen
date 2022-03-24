@@ -9,6 +9,7 @@ import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
 import org.krahe.chris.mapgen.core.util.GeoType;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -62,12 +63,19 @@ public class StyledGenerator implements Generator {
         SimpleFeatureBuilder sfBuilder = new SimpleFeatureBuilder(activeSchema);
 
         List<SimpleFeature> features = new ArrayList<>();
+        int counter = 1;
         for (Geometry geometry : options.getGeometryList()) {
             String geoTypeClassName = geoType.getGeoClass().getTypeName();
             try {
                 if (Class.forName(geoTypeClassName).isInstance(geometry))
                 {
                     sfBuilder.set(geoType.getName(), geometry);
+                    sfBuilder.set("name", String.format("%s-%s", geoType.getName(), counter++));
+                    if (geoType.equals(GeoType.POINT)) {
+                        Point p = (Point) geometry;
+                        sfBuilder.set("X", p.getX());
+                        sfBuilder.set("Y", p.getY());
+                    }
                     features.add(sfBuilder.buildFeature(null));
                 }
             } catch (ClassNotFoundException e) {

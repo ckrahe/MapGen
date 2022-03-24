@@ -3,11 +3,13 @@ package org.krahe.chris.mapgen.core;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.styling.Font;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.*;
 import org.krahe.chris.mapgen.core.util.GeoType;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory;
+import org.w3c.dom.Text;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -17,12 +19,14 @@ public class MapTools {
     private static MapTools instance = null;
 
     private final StyleFactory styleFactory;
+    private final StyleBuilder styleBuilder;
     private final FilterFactory filterFactory;
     private final Map<GeoType, SimpleFeatureType> schemaMap;
     private final Map<GeoType, Style> styleMap;
 
     private MapTools() {
         styleFactory = CommonFactoryFinder.getStyleFactory();
+        styleBuilder = new StyleBuilder();
         filterFactory = CommonFactoryFinder.getFilterFactory();
         schemaMap = createSchemaMap();
         styleMap = createStyleMap();
@@ -44,6 +48,9 @@ public class MapTools {
         sftBuilder.setName(String.format("MapGenSchema_%s", geoType.getName()));
         sftBuilder.setCRS(DefaultGeographicCRS.WGS84);
         sftBuilder.add(geoType.getName(), geoType.getGeoClass());
+        sftBuilder.add("name", String.class);
+        sftBuilder.add("X", Double.class);
+        sftBuilder.add("Y", Double.class);
 
         return sftBuilder.buildFeatureType();
     }
@@ -59,30 +66,48 @@ public class MapTools {
     }
 
     private Style createPointStyle() {
-        Graphic graphic = styleFactory.createDefaultGraphic();
+        Style style = styleBuilder.createStyle();
+        style.setName("MapGen-LabeledPointStyle");
+//        style.featureTypeStyles().add(
+//                styleBuilder.createFeatureTypeStyle("labeledPoint",
+//                        createTextSymbolizer(),
+//                        createPointSymbolizer()));
+//        style.featureTypeStyles().add(
+//                styleBuilder.createFeatureTypeStyle(createPointSymbolizer()));
+        style.featureTypeStyles().add(
+                styleBuilder.createFeatureTypeStyle(createTextSymbolizer()));
+        return style;
+    }
 
+    private PointSymbolizer createPointSymbolizer() {
         // create marker
         Mark mark = styleFactory.getCrossMark();
         mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.DARK_GRAY), filterFactory.literal(0.1)));
         mark.setFill(styleFactory.createFill(filterFactory.literal(Color.DARK_GRAY)));
 
-        // add marker
-        graphic.graphicalSymbols().clear();
-        graphic.graphicalSymbols().add(mark);
-        graphic.setSize(filterFactory.literal(10));
-        graphic.setRotation(filterFactory.literal(45));
+        // use marker
+        Graphic graphic = styleBuilder.createGraphic(null, mark, null, 1, 10, 45);
 
-        // Setting the geometryPropertyName arg to null signals that we want to
-        // draw the default geometry of features
-        PointSymbolizer sym = styleFactory.createPointSymbolizer(graphic, null);
+        return styleBuilder.createPointSymbolizer(graphic);
+    }
 
-        Rule rule = styleFactory.createRule();
-        rule.symbolizers().add(sym);
-        FeatureTypeStyle fts = styleFactory.createFeatureTypeStyle(rule);
-        Style style = styleFactory.createStyle();
-        style.featureTypeStyles().add(fts);
+    private TextSymbolizer createTextSymbolizer() {
+        AnchorPoint anchorPoint = styleBuilder.createAnchorPoint(
+                styleBuilder.attributeExpression("X"),
+                styleBuilder.attributeExpression("Y"));
+        PointPlacement pointPlacement =
+                styleBuilder.createPointPlacement(anchorPoint, null, styleBuilder.literalExpression(0));
 
-        return style;
+        return styleBuilder.createTextSymbolizer(
+                styleBuilder.createFill(Color.DARK_GRAY),
+                new Font[] {
+                        styleBuilder.createFont("Lucida Sans", 10),
+                        styleBuilder.createFont("Arial", 10)
+                },
+                styleBuilder.createHalo(),
+                styleBuilder.attributeExpression("name"),
+                pointPlacement,
+                null);
     }
 
     private Style createLineStyle() {
