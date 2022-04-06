@@ -68,12 +68,8 @@ public class MapTools {
     private Style createPointStyle() {
         Style style = styleBuilder.createStyle();
         style.setName("MapGen-LabeledPointStyle");
-//        style.featureTypeStyles().add(
-//                styleBuilder.createFeatureTypeStyle("labeledPoint",
-//                        createTextSymbolizer(),
-//                        createPointSymbolizer()));
-//        style.featureTypeStyles().add(
-//                styleBuilder.createFeatureTypeStyle(createPointSymbolizer()));
+        style.featureTypeStyles().add(
+                styleBuilder.createFeatureTypeStyle(createPointSymbolizer()));
         style.featureTypeStyles().add(
                 styleBuilder.createFeatureTypeStyle(createTextSymbolizer()));
         return style;
@@ -93,10 +89,12 @@ public class MapTools {
 
     private TextSymbolizer createTextSymbolizer() {
         AnchorPoint anchorPoint = styleBuilder.createAnchorPoint(
-                styleBuilder.attributeExpression("X"),
-                styleBuilder.attributeExpression("Y"));
+                filterFactory.literal("X"),
+                filterFactory.literal("Y"));
+        Displacement displacement = styleBuilder.createDisplacement(styleBuilder.literalExpression(7.5),
+                styleBuilder.literalExpression(0));
         PointPlacement pointPlacement =
-                styleBuilder.createPointPlacement(anchorPoint, null, styleBuilder.literalExpression(0));
+                styleBuilder.createPointPlacement(anchorPoint, displacement, styleBuilder.literalExpression(0));
 
         return styleBuilder.createTextSymbolizer(
                 styleBuilder.createFill(Color.DARK_GRAY),
