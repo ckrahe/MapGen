@@ -9,7 +9,6 @@ import org.geotools.styling.*;
 import org.krahe.chris.mapgen.core.util.GeoType;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory;
-import org.w3c.dom.Text;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -17,6 +16,7 @@ import java.util.Map;
 
 public class MapTools {
     private static MapTools instance = null;
+    private static final Color DARK = Color.decode("#666667");
 
     private final StyleFactory styleFactory;
     private final StyleBuilder styleBuilder;
@@ -78,8 +78,8 @@ public class MapTools {
     private PointSymbolizer createPointSymbolizer() {
         // create marker
         Mark mark = styleFactory.getCrossMark();
-        mark.setStroke(styleFactory.createStroke(filterFactory.literal(Color.DARK_GRAY), filterFactory.literal(0.1)));
-        mark.setFill(styleFactory.createFill(filterFactory.literal(Color.DARK_GRAY)));
+        mark.setStroke(styleFactory.createStroke(filterFactory.literal(DARK), filterFactory.literal(0.1)));
+        mark.setFill(styleFactory.createFill(filterFactory.literal(DARK)));
 
         // use marker
         Graphic graphic = styleBuilder.createGraphic(null, mark, null, 1, 10, 45);
@@ -91,29 +91,30 @@ public class MapTools {
         AnchorPoint anchorPoint = styleBuilder.createAnchorPoint(
                 filterFactory.literal("X"),
                 filterFactory.literal("Y"));
-        Displacement displacement = styleBuilder.createDisplacement(styleBuilder.literalExpression(7.5),
-                styleBuilder.literalExpression(0));
+        Displacement displacement = styleBuilder.createDisplacement(
+                styleBuilder.literalExpression(6.0),
+                styleBuilder.literalExpression(12.0));
         PointPlacement pointPlacement =
                 styleBuilder.createPointPlacement(anchorPoint, displacement, styleBuilder.literalExpression(0));
 
         return styleBuilder.createTextSymbolizer(
-                styleBuilder.createFill(Color.DARK_GRAY),
+                styleBuilder.createFill(DARK),
                 new Font[] {
-                        styleBuilder.createFont("Lucida Sans", 10),
-                        styleBuilder.createFont("Arial", 10)
+                        styleBuilder.createFont("Arial", false, true,12),
+                        styleBuilder.createFont("Lucida Sans", false, true, 12)
                 },
-                styleBuilder.createHalo(),
+                styleBuilder.createHalo(Color.WHITE, 0.55, 1),
                 styleBuilder.attributeExpression("name"),
                 pointPlacement,
                 null);
     }
 
     private Style createLineStyle() {
-        return createPolyStyle(Color.DARK_GRAY, 2, Color.GRAY, 0.0);
+        return createPolyStyle(DARK, 2, DARK, 0.0);
     }
 
     private Style createPolygonStyle() {
-        return createPolyStyle(Color.DARK_GRAY, 1, Color.GRAY, 0.2);
+        return createPolyStyle(DARK, 1, Color.decode("#999999"), 0.3);
     }
 
     private Style createPolyStyle(Color strokeColor, int strokeWidth, Color fillColor, double fillOpacity) {
